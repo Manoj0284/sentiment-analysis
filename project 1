@@ -1,0 +1,22 @@
+def build_faiss_index(features):
+    d = features.shape[1]  # Dimension of features
+    index = faiss.IndexFlatL2(d)  # Create a FAISS index for L2 distance
+    index.add(features)  # Add all dataset features to the index
+    return index
+
+def find_similar_images(query_image_path, dataset_path, model, top_n=5):
+    # Extract features for the query image
+    query_image_features = extract_features(query_image_path, model).reshape(1, -1)
+
+    # Load dataset features
+    dataset_features, image_paths = load_dataset_features(dataset_path, model)
+    
+    # Build FAISS index
+    index = build_faiss_index(dataset_features)
+    
+    # Search for similar images
+    _, similar_indices = index.search(query_image_features, top_n)
+
+    print("Top similar images:")
+    for i in similar_indices[0]:
+        print(f"Image: {image_paths[i]}")
